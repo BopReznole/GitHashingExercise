@@ -1,0 +1,149 @@
+#### Σημείωση:
+
+Αυτό το κείμενο είναι γραμμένο σε μορφή markdown, καλύτερα να το διαβάσετε με κάποιο markdown viewer (ή δοκιμάστε να αλλάξετε την επέκταση του αρχείου από .txt σε .md)
+
+***
+
+### Example1.c
+
+1. Το πρόγραμμα αυτό δημιουργεί ένα child process με την fork(), το οποίο child process τρέχει την bash εντολή `ls -l` χρησιμοποιώντας την execlp, ενώ γίνονται print στην κονσόλα τα child process και parent processes ID 2 φορές (μία όταν αρχίζει να τρέχει το parent process και μία ακόμα όταν τελείωνει το child process). Τα 2 αυτά processes τρέχουν παράλληλα.
+
+2. Παράδειγμα χρήσης προγράμματος:
+	```
+	gvavouras@csal-vm:~/Lab04$ ./example1 
+	Child Process: PID = 3792697, Parent PID = 3792696
+	Parent Process: PID = 3792696, Created Child PID = 3792697
+	total 48
+	-rwxrwxr-x 1 gvavouras gvavouras 17048 Jan 19 21:23 example1
+	-rw-rw-r-- 1 gvavouras gvavouras   855 Jan 16 13:23 example1.c
+	-rw-rw-r-- 1 gvavouras gvavouras   347 Jan 16 13:23 example2.c
+	-rw-rw-r-- 1 gvavouras gvavouras   643 Jan 16 13:23 example3.c
+	-rw-rw-r-- 1 gvavouras gvavouras   670 Jan 16 13:23 example4.c
+	-rw-rw-r-- 1 gvavouras gvavouras  1622 Jan 16 13:23 example5.c
+	-rw-rw-r-- 1 gvavouras gvavouras   911 Jan 16 13:45 example6.c
+	-rw-rw-r-- 1 gvavouras gvavouras   564 Jan 16 13:23 Makefile-lab04
+	Parent Process: Child has terminated.
+	```
+
+3. Ο κώδικας λειτουργεί ως εξής:
+	1. Αρχικά εισάγονται οι απαραίτητες βιβλιοθήκες
+	2. Στην συνέχεια δημιουργείται μια μεταβλητή pid η οποία θα αποθηκεύσει την PID που θα επιστρέψει η fork().
+	3. Με την fork δημιουργείται το child process και επιστρέφει επιστρέφει την τιμή 0 μέσα στο child process και την PID του child process στο parent process
+	4. Με τον έλεγχο if γίνεται ο εξής έλεγχος:
+		- Αν το pid<0, τότε υπάρχει κάποιο error και κάνει exit το πρόγραμμα
+		- Αν το pid=0, τότε τρέχει το child process, κάνει print τα child process και parent processes ID και εκτελεί την bash εντολή `ls -l` με την execlp()
+			- Επιπλέον, σε περίπτωση που η execlp() αποτύχει, κάνει exit το πρόγραμμα
+		- Αν το pid>0, τότε τρέχει το parent process, κάνει print τα child process και parent processes ID, περιμένει το child process να τελειώσει (αφού τρέχουν παράλληλα) και αφού κάνει print "Parent Process: Child has terminated."
+	5. Το πρόγραμμα τελειώνει
+
+### Example2.c
+
+1. Το πρόγραμμα αυτό κάνει print τα process και parent process IDs του προγράμματος.
+
+2. Παράδειγμα χρήσης προγράμματος:
+	```
+	gvavouras@csal-vm:~/Lab04$ ./example2
+	Current Process ID (PID): 3793499
+	Parent Process ID (PPID): 3789949
+	```
+
+3. Ο κώδικας λειτουργεί ως εξής:
+	1. Αρχικά εισάγονται οι απαραίτητες βιβλιοθήκες
+	2. Δημιουργούνται 2 μεταβλητές, οι pid και ppid που θα αποθηκεύσουν τις PID των process και parent processes αντίστοιχα
+	3. Καταχωρείται η process ID του προγράμματος στην pid με την χρήση της getpid()
+	4. Καταχωρείται η parent process ID του προγράμματος στην ppid (αν το τρέξουμε σε terminal τότε θα επιστρέψει την PID του terminal) με την χρήση της getppid()
+	5. Γίνονται print οι pid και ppid στην κονσόλα
+	6. Το πρόγραμμα τελειώνει
+	
+### Example3.c
+
+1. Το πρόγραμμα αυτό τρέχει συνεχόμενα μέχρι να πατηθεί το `Ctrl+C`, το οποίο θα στείλει το σήμα SIGINT και θα κάνει exit η εφαρμογή
+
+2. Παράδειγμα χρήσης προγράμματος:
+	```
+	gvavouras@csal-vm:~/Lab04$ ./example3
+	Process ID: 3794282
+	Press Ctrl+C to trigger SIGINT.
+	Running... Press Ctrl+C to exit.
+	Running... Press Ctrl+C to exit.
+	^C
+	Caught signal 2 (SIGINT). Exiting gracefully...
+	```
+
+3. Ο κώδικας λειτουργεί ως εξής:
+	1. Αρχικά εισάγονται οι απαραίτητες βιβλιοθήκες
+	2. Ορίζεται η συνάρτηση sigint_handler() η οποία κάνει print `Caught signal %d (SIGINT). Exiting gracefully...` (όπου `%d` το νούμερο-κωδικός του σήματος με το οποίο κλήθηκε, το SIGINT) και exit το πρόγραμμα όταν κληθεί
+	3. Στην main καταχωρείται πρώτα η συνάρτηση sigint_handler() να καλείται όταν εισάγεται το σήμα SIGINT στην κονσόλα
+		- Επίσης γίνεται και έλεγχος αν πέτυχε η καταχώρηση και στην περίπτωση που απέτυχε βγάζει error `signal` και κάνει exit το πρόγραμμα
+	4. Μετά γίνεται print το PID του προγράμματος και το string `Press Ctrl+C to trigger SIGINT.`
+	5. Τέλος, τρέχει συνεχόμενα η while λούπα (με το όρισμα 1) και ανά 2 δευτερόλεπτα (κάνοντας παύση με το sleep()) κάνει print το string `Running... Press Ctrl+C to exit.` μέχρι να στείλουμε το σήμα SIGINT στο πρόγραμμα και να κάνει exit.
+
+### Example4.c
+
+1. Το πρόγραμμα αυτό τρέχει συνεχόμενα και "αγνοεί" το σήμα SIGINT, αφού όταν πατηθεί το `Ctrl+C` (που θα στείλει το σήμα SIGINT), το μόνο που θα κάνει θα είναι print 
+
+2. Παράδειγμα χρήσης προγράμματος (τερματίστηκε τρέχοντας `kill -9 3795128` σε άλλο tab της κονσόλας):
+	```
+	gvavouras@csal-vm:~/Lab04$ ./example4
+	Process ID: 3795128
+	Press Ctrl+C to attempt to send SIGINT.
+	Running... Try pressing Ctrl+C.
+	^C
+	Received SIGINT (signal 2), but ignoring it.
+	Running... Try pressing Ctrl+C.
+	^C
+	Received SIGINT (signal 2), but ignoring it.
+	Running... Try pressing Ctrl+C.
+	Running... Try pressing Ctrl+C.
+	Running... Try pressing Ctrl+3795128C.
+	Running... Try pressing Ctrl+C.
+	Running... Try pressing Ctrl+C.
+	Running... Try pressing Ctrl+C.
+	^C
+	Received SIGINT (signal 2), but ignoring it.
+	Running... Try pressing Ctrl+C.
+	Running... Try pressing Ctrl+C.
+	Running... Try pressing Ctrl+C.
+	Running... Try pressing Ctrl+C.
+	Running... Try pressing Ctrl+C.
+	Running... Try pressing Ctrl+C.
+	Running... Try pressing Ctrl+C.
+	Killed
+	```
+
+3. Ο κώδικας λειτουργεί ως εξής:
+	1. Αρχικά εισάγονται οι απαραίτητες βιβλιοθήκες
+	2. Ορίζεται η συνάρτηση sigint_handler() η οποία κάνει print `Received SIGINT (signal %d), but ignoring it.` (όπου `%d` το νούμερο-κωδικός του σήματος με το οποίο κλήθηκε, το SIGINT) όταν κληθεί
+	3. Στην main καταχωρείται πρώτα η συνάρτηση sigint_handler() να καλείται όταν εισάγεται το σήμα SIGINT στην κονσόλα
+		- Επίσης γίνεται και έλεγχος αν πέτυχε η καταχώρηση και στην περίπτωση που απέτυχε βγάζει error `signal` και κάνει exit το πρόγραμμα
+	4. Μετά γίνεται print το PID του προγράμματος και το string `Press Ctrl+C to attempt to send SIGINT.`
+	5. Τέλος, τρέχει συνεχόμενα η while λούπα (με το όρισμα 1) και ανά 2 δευτερόλεπτα (κάνοντας παύση με το sleep()) κάνει print το string `Running... Press Ctrl+C to exit.`, ενώ όταν στέλνουμε το σήμα SIGINT στο πρόγραμμα καλείται η sigint_handler()
+	6. Το πρόγραμμα τερματίζει μόνο αν τρέξουμε την εντολή `kill -9 PID`, όπου pid είναι η pid του προγράμματος
+	
+### Example5.c
+
+1. Το πρόγραμμα αυτό δημιουργεί ένα child process για να δείξει πως μπορούν να επικοινωνήσουν με σήματα τα child και parent processes. Εδώ το parent στέλνει τα σήματα SIGUSR1 και SIGTERM (το τελευταίο τερματίζει το πρόγραμμα)
+
+2. Παράδειγμα χρήσης προγράμματος:
+	```
+	gvavouras@csal-vm:~/Lab04$ ./example5
+	Parent process ID: 3795870. Child PID: 3795871
+	Child process ID: 3795871. Waiting for SIGUSR1...
+	Parent sending SIGUSR1 to child.
+	Child received SIGUSR1 (signal 10).
+	Parent sending SIGTERM to child.
+	Child process terminated.
+	```
+
+3. Ο κώδικας λειτουργεί ως εξής:
+	1. Αρχικά εισάγονται οι απαραίτητες βιβλιοθήκες
+	2. Ορίζεται η συνάρτηση sigusr1_handler() η οποία κάνει print `Child received SIGUSR1 (signal %d).` (όπου `%d` το νούμερο-κωδικός του σήματος με το οποίο κλήθηκε, το SIGUSR1) όταν κληθεί
+	3. Στην συνέχεια δημιουργείται μια μεταβλητή pid η οποία θα αποθηκεύσει την PID που θα επιστρέψει η fork().
+	4. Με την fork δημιουργείται το child process και επιστρέφει επιστεισάγεταιρέφει την τιμή 0 μέσα στο child process και την PID του child process στο parent process
+	5. Με τον έλεγχο if γίνεται ο εξής έλεγχος:
+		- Αν pid=-1, τότε υπάρχει error και κάνει exit
+		- Αν pid=0, τότε τρέχει το child process
+		- Αν pid>0, τότε τρέχει το parent process
+	6. Όταν τρέχει το child process, καταχωρείται η συνάρτηση sigint_handler() να καλείται όταν λαμβάνει το σήμα SIGUSR1, κάνει print τα child process και parent processes ID και τρέχει συνεχόμενα με το while loop το οποίο είναι μονίμως σε παύση καθώς περιμένει σήματα (από το parent process)
+			- Επίσης γίνεται και έλεγχος αν πέτυχε η καταχώρηση και στην περίπτωση που απέτυχε βγάζει error `signal` και κάνει exit το πρόγραμμα
+	7. Όταν τρέχει το parent process, τότε πρώτα κάνει print τα child process και parent processes ID, κάνει παύση 3 δευτερόλεπτα περιμένοντας το child process που τρέχει παράλληλα και αφού κάνει print `Parent sending SIGUSR1 to child.` στέλνει το σήμα SIGUSR1 στο child process. Μετά κάνει παύση άλλο 1 δευτερόλεπτο και αφού κάνει print `Parent sending SIGTERM to child.` στέλνει το σήμα SIGTERM στο child process. Τέλος περιμένει να τελειώσει το child process και τερματίζει το πρόγραμμα αφού κάνει print `Child process terminated.`
