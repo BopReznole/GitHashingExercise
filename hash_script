@@ -1,0 +1,8 @@
+#! /bin/bash
+
+# $1: is the input to be hashed
+# -n: echo will normally output a newline, which is suppressed with -n
+# sha256sum: encrypts the string
+# cut -d " " -f1: keeps only the hash (otherwise it ends with " - "
+# it writes the output to hash_output.txt
+echo -n "$1" | sha256sum | cut -d " " -f1 > hash_output.txt
